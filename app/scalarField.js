@@ -11,10 +11,24 @@ ScalarField.prototype.get = function(x, y) {
 ScalarField.prototype.set = function(x, y, val) {
   this.data[y * this.sideLen + x] = val;
 };
+ScalarField.prototype.getSideLen = function() {
+  return this.sideLen;
+};
 
 ScalarField.prototype.asTexture = function() {
+  let rgbaData = new Float32Array(
+    this.data.length*4
+  );
+  for (let i = 0; i < this.data.length; i++) {
+    rgbaData[i*4]     = 0;
+    rgbaData[i*4 + 1] = 0;
+    rgbaData[i*4 + 2] = 0;
+    rgbaData[i*4 + 3] = this.data[i];
+  }
+
   let tex = new Three.DataTexture(
-      this.data, this.sideLen, this.sideLen, Three.AlphaFormat, Three.FloatType
+      rgbaData, this.sideLen, this.sideLen,
+      Three.RGBAFormat, Three.FloatType
   );
   tex.minFilter   = Three.NearestFilter;
   tex.magFilter   = Three.LinearFilter;

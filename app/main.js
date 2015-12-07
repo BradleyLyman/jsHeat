@@ -10,7 +10,8 @@
       Route       = ReactRouter.Route,
       Link        = ReactRouter.Link,
       ScalarField = require('./scalarField.js'),
-      SfRenderer  = require('./sfRenderer.js');
+      SfRenderer  = require('./sfRenderer.js'),
+      Kernel      = require('./kernel.js');
 
   const Scene = React.createClass({
     mixins : [ThreeMixin],
@@ -21,13 +22,36 @@
         this.field = ScalarField.create(8, 1.0);
         this.field.set(2, 3, 0.0);
         this.field.set(5, 5, 0.0);
+        this.kernel = Kernel.create(this.field);
       }
+      let rtt = new Three.WebGLRenderTarget(
+        8, 8, {
+          depthBuffer : false,
+          stencilBuffer : false,
+          generateMipmaps : false,
+          format : Three.RGBAFormat,
+          type : Three.UnsignedByteType,
+        }
+      );
+      console.log(rtt);
+      this.size = { width : 1, height : 1 };
       this.start();
     },
 
     updateScene : function() {
+      let tex = this.field.asTexture();
+      let rtt = new Three.WebGLRenderTarget(
+        8, 8, {
+          depthBuffer : false,
+          stencilBuffer : false,
+          generateMipmaps : false,
+          format : Three.RGBAFormat,
+          type : Three.UnsignedByteType,
+        }
+      );
+      this.kernel.execute(this.renderer, rtt, this.size);
       this.sfr.render(
-        this.renderer, this.field.asTexture()
+        this.renderer, rtt
       );
     },
 
@@ -36,6 +60,7 @@
         width  : this.canvasWidth,
         height : this.canvasHeight,
       };
+      this.size = dims;
       this.sfr.resize(dims);
     },
 
