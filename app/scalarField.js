@@ -1,3 +1,4 @@
+'use strict';
 let Three = require('three');
 
 let ScalarField = {};
@@ -28,9 +29,11 @@ let create = function(sideLen, initialValue) {
     data      : new Float32Array(sideLen * sideLen),
   };
 
-  field.data.forEach(function(_, index) {
-    field.data[index] = initialValue;
-  });
+  for (let i = 0; i < field.data.length; i++) {
+    field.data[i] = initialValue;
+  }
+  console.log(initialValue);
+  console.log(field.data);
   return field;
 };
 
