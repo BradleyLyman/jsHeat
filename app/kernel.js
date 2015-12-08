@@ -4,23 +4,16 @@ let Three = require('three');
 const vertexShaderSrc = `
   varying vec2 varyPos;
   void main() {
-    varyPos = position;
+    varyPos = position.xy;
     gl_Position =
         modelViewMatrix * projectionMatrix *
         vec4(position, 1.0);
   }
 `;
 
-const fragmentShaderSrc = `
+const fragmentShaderLeader = `
+  uniform float n;
   varying vec2 varyPos;
-  void main() {
-    float val = 0.0;
-    if (varyPos.x < 0.0) {
-      val = 1.0;
-    }
-
-    gl_FragColor = vec4(1.0);
-  }
 `;
 
 let Kernel = {};
@@ -33,26 +26,28 @@ Kernel.prototype.execute =
   renderer.setViewport(0, 0, dims.width, dims.height);
 };
 
-let createKernel = function(field) {
+let createKernel = function(sideLen, kernelSrc) {
   let material = new Three.ShaderMaterial({
+    uniforms : { n : { type : "f", value : sideLen } },
     vertexShader   : vertexShaderSrc,
-    fragmentShader : fragmentShaderSrc,
+    fragmentShader : fragmentShaderLeader + kernelSrc,
   });
 
-  let dim = field.getSideLen() / 2;
+  let dim = sideLen / 2;
   let camera = new Three.OrthographicCamera(
     -dim, dim, dim, -dim, 1.0, -1.0
   );
 
   let scene         = new Three.Scene();
-  let planeGeometry = new Three.PlaneGeometry(dim*2, dim*2);
+  let planeGeometry = new Three.PlaneGeometry(sideLen, sideLen);
   let plane = new Three.Mesh(planeGeometry, material);
+  scene.add(plane);
 
   return {
     __proto__ : Kernel.prototype,
     scene     : scene,
     camera    : camera,
-    size      : dim*2,
+    size      : sideLen,
   };
 };
 

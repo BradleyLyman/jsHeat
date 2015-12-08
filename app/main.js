@@ -19,34 +19,24 @@
     componentDidMount : function() {
       if (this.sfr === undefined) {
         this.sfr = SfRenderer.create();
-        this.field = ScalarField.create(8, 1.0);
-        this.field.set(2, 3, 0.0);
-        this.field.set(5, 5, 0.0);
-        this.kernel = Kernel.create(this.field);
+        this.kernel = Kernel.create(512, `
+          void main() {
+            gl_FragColor = vec4(0.0, 0.0, 0.0, abs(varyPos.y/n));
+          }
+        `);
       }
-      let rtt = new Three.WebGLRenderTarget(
-        8, 8, {
-          depthBuffer : false,
-          stencilBuffer : false,
-          generateMipmaps : false,
-          format : Three.RGBAFormat,
-          type : Three.UnsignedByteType,
-        }
-      );
-      console.log(rtt);
       this.size = { width : 1, height : 1 };
       this.start();
     },
 
     updateScene : function() {
-      let tex = this.field.asTexture();
       let rtt = new Three.WebGLRenderTarget(
-        8, 8, {
+        512, 512, {
           depthBuffer : false,
           stencilBuffer : false,
           generateMipmaps : false,
           format : Three.RGBAFormat,
-          type : Three.UnsignedByteType,
+          type : Three.FloatType,
         }
       );
       this.kernel.execute(this.renderer, rtt, this.size);

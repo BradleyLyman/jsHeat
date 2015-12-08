@@ -24,7 +24,7 @@ const fragmentShaderSrc = `
 let sfRenderer = {};
 
 sfRenderer.prototype = {};
-sfRenderer.prototype.render = function(renderer, dataTex) {
+sfRenderer.prototype.render = function(renderer, dataTex, target) {
   this.uniforms.data.value = dataTex;
   renderer.render(this.scene, this.camera);
 };
