@@ -21,7 +21,15 @@
 
       if (this.sfr === undefined) {
         this.sfr = SfRenderer.create();
-        this.sf  = ScalarField.create(512, 0.5, this.renderer);
+        this.sf  = ScalarField.create(
+          512, 0.5, this.renderer
+        );
+        this.kernel = Kernel.create(512, `
+          void main() {
+            gl_FragColor = vec4(abs(varyPos.x/n*2.0));
+          }
+        `);
+        this.kernel.execute(this.renderer, this.sf.rtt);
       }
       this.start();
     },

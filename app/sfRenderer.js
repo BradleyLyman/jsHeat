@@ -14,10 +14,32 @@ const vertexShaderSrc = `
 const fragmentShaderSrc = `
   varying vec2 varyUv;
   uniform sampler2D data;
+  struct ColorPoint {
+    vec4 color;
+    float d;
+  };
+
   void main() {
-    gl_FragColor =
-      texture2D(data, varyUv).a *
-      vec4(0.2, 0.2, 0.8, 1.0);
+    ColorPoint gradient[4];
+    gradient[0] = ColorPoint(vec4(0.0), 0.0);
+    gradient[1] = ColorPoint(vec4(0.0,0.0,1.0,1.0), 0.3);
+    gradient[2] = ColorPoint(vec4(0.0,1.0,0.0,1.0), 0.6);
+    gradient[3] = ColorPoint(vec4(1.0,0.0,0.0,1.0), 1.0);
+
+    float val = texture2D(data, varyUv).a;
+
+    float max = 1.0;
+    vec4 finalColor = vec4(0.0);
+    for (int i = 1; i < 4; i++) {
+      finalColor =
+        mix(finalColor, gradient[i].color,
+            smoothstep(
+              gradient[i-1].d, gradient[i].d, (val/max)
+            )
+        );
+    }
+
+    gl_FragColor = finalColor;
   }
 `;
 
