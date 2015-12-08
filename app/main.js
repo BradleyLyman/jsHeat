@@ -24,12 +24,12 @@
         this.sf  = ScalarField.create(
           512, 0.5, this.renderer
         );
-        this.kernel = Kernel.create(512, `
+        this.kernel = this.sf.createKernel(`
           void main() {
             gl_FragColor = vec4(abs(varyPos.x/n*2.0));
           }
         `);
-        this.kernel.execute(this.renderer, this.sf.rtt);
+        this.kernel.execute(this.renderer, this.sf);
       }
       this.start();
     },
