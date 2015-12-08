@@ -22,7 +22,7 @@
       if (this.sfr === undefined) {
         this.sfr = SfRenderer.create();
         this.sf  = ScalarField.create(
-          512, 0.5, this.renderer
+          4, 0.5, this.renderer
         );
         this.kernel = this.sf.createKernel(`
           void main() {
