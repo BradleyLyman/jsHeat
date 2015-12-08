@@ -17,32 +17,17 @@
     mixins : [ThreeMixin],
 
     componentDidMount : function() {
+      this.renderer.size = { width : 1, height : 1 };
+
       if (this.sfr === undefined) {
         this.sfr = SfRenderer.create();
-        this.kernel = Kernel.create(512, `
-          void main() {
-            gl_FragColor = vec4(0.0, 0.0, 0.0, abs(varyPos.y/n));
-          }
-        `);
+        this.sf  = ScalarField.create(512, 0.5, this.renderer);
       }
-      this.size = { width : 1, height : 1 };
       this.start();
     },
 
     updateScene : function() {
-      let rtt = new Three.WebGLRenderTarget(
-        512, 512, {
-          depthBuffer : false,
-          stencilBuffer : false,
-          generateMipmaps : false,
-          format : Three.RGBAFormat,
-          type : Three.FloatType,
-        }
-      );
-      this.kernel.execute(this.renderer, rtt, this.size);
-      this.sfr.render(
-        this.renderer, rtt
-      );
+      this.sfr.render(this.renderer, this.sf);
     },
 
     onResize : function() {
@@ -50,7 +35,7 @@
         width  : this.canvasWidth,
         height : this.canvasHeight,
       };
-      this.size = dims;
+      this.renderer.size = dims;
       this.sfr.resize(dims);
     },
 

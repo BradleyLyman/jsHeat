@@ -1,54 +1,34 @@
 'use strict';
-let Three = require('three');
+let Three = require('three'),
+    Kernel = require('./kernel.js');
 
 let ScalarField = {};
 
 ScalarField.prototype = {};
-ScalarField.prototype.get = function(x, y) {
-  return this.data[y * this.sideLen + x];
-};
 
-ScalarField.prototype.set = function(x, y, val) {
-  this.data[y * this.sideLen + x] = val;
-};
-ScalarField.prototype.getSideLen = function() {
-  return this.sideLen;
-};
+let create = function(sideLen, initialValue, renderer) {
+  let initializerKernel = Kernel.create(sideLen, `
+    void main() {
+      gl_FragColor = vec4(${initialValue});
+    }
+  `);
 
-ScalarField.prototype.asTexture = function() {
-  let rgbaData = new Float32Array(
-    this.data.length*4
+  let renderTarget = new Three.WebGLRenderTarget(
+    sideLen, sideLen, {
+      depthBuffer : false,
+      stencilBuffer : false,
+      generateMipmaps : false,
+      format : Three.RGBAFormat,
+      type : Three.FloatType
+    }
   );
-  for (let i = 0; i < this.data.length; i++) {
-    rgbaData[i*4]     = 0;
-    rgbaData[i*4 + 1] = 0;
-    rgbaData[i*4 + 2] = 0;
-    rgbaData[i*4 + 3] = this.data[i];
-  }
 
-  let tex = new Three.DataTexture(
-      rgbaData, this.sideLen, this.sideLen,
-      Three.RGBAFormat, Three.FloatType
-  );
-  tex.minFilter   = Three.NearestFilter;
-  tex.magFilter   = Three.LinearFilter;
-  tex.needsUpdate = true;
-  return tex;
-};
+  initializerKernel.execute(renderer, renderTarget);
 
-let create = function(sideLen, initialValue) {
-  let field     = {
+  return {
     __proto__ : ScalarField.prototype,
-    sideLen   : sideLen,
-    data      : new Float32Array(sideLen * sideLen),
+    rtt       : renderTarget,
   };
-
-  for (let i = 0; i < field.data.length; i++) {
-    field.data[i] = initialValue;
-  }
-  console.log(initialValue);
-  console.log(field.data);
-  return field;
 };
 
 module.exports.create = create;

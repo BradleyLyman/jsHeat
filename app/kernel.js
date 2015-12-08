@@ -19,11 +19,12 @@ const fragmentShaderLeader = `
 let Kernel = {};
 
 Kernel.prototype = {};
-Kernel.prototype.execute =
-    function(renderer, target, dims) {
+Kernel.prototype.execute = function(renderer, target) {
   renderer.setViewport(0, 0, this.size, this.size);
   renderer.render(this.scene, this.camera, target);
-  renderer.setViewport(0, 0, dims.width, dims.height);
+  renderer.setViewport(
+    0, 0, renderer.size.width, renderer.size.height
+  );
 };
 
 let createKernel = function(sideLen, kernelSrc) {
