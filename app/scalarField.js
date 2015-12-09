@@ -21,6 +21,7 @@ let create = function(sideLen, initialValue, renderer) {
       depthBuffer : false,
       stencilBuffer : false,
       generateMipmaps : false,
+      magFilter : Three.NearestFilter,
       format : Three.RGBAFormat,
       type : Three.FloatType
     }

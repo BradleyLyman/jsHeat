@@ -17,24 +17,42 @@
     mixins : [ThreeMixin],
 
     componentDidMount : function() {
-      this.renderer.size = { width : 1, height : 1 };
+      this.renderer.size =
+        { width : 1, height : 1 };
+
+      this.renderer.autoClear = false;
 
       if (this.sfr === undefined) {
         this.sfr = SfRenderer.create();
         this.sf  = ScalarField.create(
-          4, 0.5, this.renderer
+          64, 0.5, this.renderer
         );
         this.kernel = this.sf.createKernel(`
           void main() {
-            gl_FragColor = vec4(abs(varyPos.x/n*2.0));
+            gl_FragColor = vec4(1.0);
           }
         `);
         this.kernel.execute(this.renderer, this.sf);
+
+        let bcKernel = this.sf.createKernel(`
+          void main() {
+            gl_FragColor = vec4(0.2);
+          }
+        `);
+        bcKernel.executeBc(this.renderer, this.sf);
+
+        let bodyKernel = this.sf.createKernel(`
+          void main() {
+            gl_FragColor = vec4(0.5);
+          }
+        `);
+        bodyKernel.executeBody(this.renderer, this.sf);
       }
       this.start();
     },
 
     updateScene : function() {
+      //this.renderer.clear();
       this.sfr.render(this.renderer, this.sf);
     },
 

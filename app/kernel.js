@@ -30,6 +30,28 @@ Kernel.prototype.execute =
   );
 };
 
+Kernel.prototype.executeBc =
+    function(renderer, scalarFieldTgt) {
+  renderer.setViewport(0, 0, this.size, this.size);
+  renderer.render(
+    this.bcScene, this.camera, scalarFieldTgt.rtt
+  );
+  renderer.setViewport(
+    0, 0, renderer.size.width, renderer.size.height
+  );
+};
+
+Kernel.prototype.executeBody =
+    function(renderer, scalarFieldTgt) {
+  renderer.setViewport(0, 0, this.size, this.size);
+  renderer.render(
+    this.bodyScene, this.camera, scalarFieldTgt.rtt
+  );
+  renderer.setViewport(
+    0, 0, renderer.size.width, renderer.size.height
+  );
+};
+
 let createKernel = function(sideLen, kernelSrc) {
   let material = new Three.ShaderMaterial({
     uniforms : { n : { type : "f", value : sideLen } },
@@ -47,9 +69,31 @@ let createKernel = function(sideLen, kernelSrc) {
   let plane = new Three.Mesh(planeGeometry, material);
   scene.add(plane);
 
+  let bcScene = new Three.Scene();
+  let lineGeometry = new Three.Geometry();
+  lineGeometry.vertices.push(
+    new Three.Vector3(dim, dim, 0.0),
+    new Three.Vector3(dim, -dim+1, 0.0),
+    new Three.Vector3(-dim+1, -dim, 0.0),
+    new Three.Vector3(-dim+1, dim, 0.0),
+    new Three.Vector3(dim, dim, 0.0),
+  );
+  bcScene.add(
+    new Three.Line(lineGeometry, material)
+  );
+
+  let bodyScene = new Three.Scene();
+  let bodyGeometry =
+    new Three.PlaneGeometry(sideLen-2, sideLen-2);
+  bodyScene.add(
+    new Three.Mesh(bodyGeometry, material)
+  );
+
   return {
     __proto__ : Kernel.prototype,
     scene     : scene,
+    bcScene   : bcScene,
+    bodyScene : bodyScene,
     camera    : camera,
     size      : sideLen,
   };
