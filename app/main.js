@@ -27,13 +27,6 @@
         this.sf  = ScalarField.create(
           64, 0.5, this.renderer
         );
-        this.kernel = this.sf.createKernel(`
-          void main() {
-            gl_FragColor = vec4(1.0);
-          }
-        `);
-        this.kernel.execute(this.renderer, this.sf);
-
         let bcKernel = this.sf.createKernel(`
           void main() {
             gl_FragColor = vec4(0.2);
@@ -52,7 +45,6 @@
     },
 
     updateScene : function() {
-      //this.renderer.clear();
       this.sfr.render(this.renderer, this.sf);
     },
 

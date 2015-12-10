@@ -19,37 +19,28 @@ const fragmentShaderLeader = `
 let Kernel = {};
 
 Kernel.prototype = {};
-Kernel.prototype.execute =
-    function(renderer, scalarFieldTgt) {
+Kernel.prototype.executeScene =
+    function(renderer, scalarFieldTgt, scene) {
   renderer.setViewport(0, 0, this.size, this.size);
-  renderer.render(
-    this.scene, this.camera, scalarFieldTgt.rtt
-  );
+  renderer.render(scene, this.camera, scalarFieldTgt.rtt);
   renderer.setViewport(
     0, 0, renderer.size.width, renderer.size.height
   );
+};
+
+Kernel.prototype.execute =
+    function(renderer, scalarFieldTgt) {
+  this.executeScene(renderer, scalarFieldTgt, this.scene);
 };
 
 Kernel.prototype.executeBc =
     function(renderer, scalarFieldTgt) {
-  renderer.setViewport(0, 0, this.size, this.size);
-  renderer.render(
-    this.bcScene, this.camera, scalarFieldTgt.rtt
-  );
-  renderer.setViewport(
-    0, 0, renderer.size.width, renderer.size.height
-  );
+  this.executeScene(renderer, scalarFieldTgt, this.bcScene);
 };
 
 Kernel.prototype.executeBody =
     function(renderer, scalarFieldTgt) {
-  renderer.setViewport(0, 0, this.size, this.size);
-  renderer.render(
-    this.bodyScene, this.camera, scalarFieldTgt.rtt
-  );
-  renderer.setViewport(
-    0, 0, renderer.size.width, renderer.size.height
-  );
+  this.executeScene(renderer, scalarFieldTgt, this.bodyScene);
 };
 
 let createKernel = function(sideLen, kernelSrc) {
