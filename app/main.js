@@ -25,26 +25,54 @@
       if (this.sfr === undefined) {
         this.sfr = SfRenderer.create();
         this.sf  = ScalarField.create(
-          64, 0.5, this.renderer
+          256, 0.3, this.renderer
         );
-        let bcKernel = this.sf.createKernel(`
+        this.bcKernel = this.sf.createKernel(`
           void main() {
-            gl_FragColor = vec4(0.2);
+            gl_FragColor = vec4(0.0);
           }
         `);
-        bcKernel.executeBc(this.renderer, this.sf);
 
-        let bodyKernel = this.sf.createKernel(`
+        this.heatIntegrater = this.sf.createKernel(`
+          vec2 lr(vec2 p) {
+            vec2 left = p - vec2(1.0/n, 0.0);
+            vec2 right = p + vec2(1.0/n, 0.0);
+            vec2 res;
+            res.x = texture2D(data, left).a;
+            res.y = texture2D(data, right).a;
+            return res;
+          }
+
+          vec2 bt(vec2 p) {
+            vec2 t = p + vec2(0.0, 1.0/n);
+            vec2 b = p - vec2(0.0, 1.0/n);
+            vec2 res;
+            res.x = texture2D(data, t).a;
+            res.y = texture2D(data, b).a;
+            return res;
+          }
+
           void main() {
-            gl_FragColor = vec4(0.5);
+            float dt = 0.000003;
+            vec2 point = snapToGrid(varyUv);
+            vec2 p0p2 = lr(point);
+            vec2 p3p4 = bt(point);
+            float p1 = texture2D(data, point).a;
+
+            gl_FragColor = vec4(p1 + dt*n*n*(p0p2.x + p0p2.y + p3p4.x + p3p4.y - 4.0*p1));
           }
         `);
-        bodyKernel.executeBody(this.renderer, this.sf);
       }
       this.start();
     },
 
     updateScene : function() {
+      for (let i = 0; i < 10; i++) {
+        this.heatIntegrater.executeBody(this.renderer, this.sf);
+        this.bcKernel.executeBc(this.renderer, this.sf);
+        this.sf.swapBuffers();
+      }
+
       this.sfr.render(this.renderer, this.sf);
     },
 

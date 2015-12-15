@@ -47,7 +47,7 @@ let sfRenderer = {};
 
 sfRenderer.prototype = {};
 sfRenderer.prototype.render = function(renderer, scalarField) {
-  this.uniforms.data.value = scalarField.rtt;
+  this.uniforms.data.value = scalarField.read;
   renderer.render(this.scene, this.camera);
 };
 

@@ -2,11 +2,27 @@
 let Three = require('three'),
     Kernel = require('./kernel.js');
 
+const RENDER_TARGET_SETTINGS = {
+  depthBuffer     : false,
+  stencilBuffer   : false,
+  generateMipmaps : false,
+  minFilter       : Three.NearestFilter,
+  magFilter       : Three.NearestFilter,
+  format          : Three.RGBAFormat,
+  type            : Three.FloatType,
+};
+
 let ScalarField = {};
 
 ScalarField.prototype = {};
 ScalarField.prototype.createKernel = function(kernelSrc) {
   return Kernel.create(this.sideLen, kernelSrc);
+};
+
+ScalarField.prototype.swapBuffers = function() {
+  let temp   = this.read;
+  this.read  = this.write;
+  this.write = temp;
 };
 
 let create = function(sideLen, initialValue, renderer) {
@@ -16,24 +32,26 @@ let create = function(sideLen, initialValue, renderer) {
     }
   `);
 
-  let renderTarget = new Three.WebGLRenderTarget(
-    sideLen, sideLen, {
-      depthBuffer : false,
-      stencilBuffer : false,
-      generateMipmaps : false,
-      magFilter : Three.NearestFilter,
-      format : Three.RGBAFormat,
-      type : Three.FloatType
-    }
+  let readTarget = new Three.WebGLRenderTarget(
+    sideLen, sideLen, RENDER_TARGET_SETTINGS
   );
 
-  initializerKernel.execute(renderer, renderTarget);
+  let writeTarget = new Three.WebGLRenderTarget(
+    sideLen, sideLen, RENDER_TARGET_SETTINGS
+  );
 
-  return {
+  let sf = {
     __proto__ : ScalarField.prototype,
-    rtt       : renderTarget,
+    read      : readTarget,
+    write     : writeTarget,
     sideLen   : sideLen,
   };
+
+  initializerKernel.execute(renderer, sf);
+  sf.swapBuffers();
+  initializerKernel.execute(renderer, sf);
+
+  return sf;
 };
 
 module.exports.create = create;

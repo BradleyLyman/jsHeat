@@ -2,9 +2,12 @@
 let Three = require('three');
 
 const vertexShaderSrc = `
-  varying vec2 varyPos;
+  uniform float n;
+  varying vec2 varyUv;
   void main() {
-    varyPos = position.xy;
+    vec2 offset = vec2(n/2.0);
+    vec2 tpos   = position.xy + offset;
+    varyUv      = tpos / n;
     gl_Position =
         modelViewMatrix * projectionMatrix *
         vec4(position, 1.0);
@@ -13,7 +16,26 @@ const vertexShaderSrc = `
 
 const fragmentShaderLeader = `
   uniform float n;
-  varying vec2 varyPos;
+  uniform sampler2D data;
+  varying vec2 varyUv;
+
+  float round(float x) {
+    float f = fract(x);
+    float b = floor(x);
+    float t = ceil(x);
+    float botRes = float(int(f < 0.5));
+    float topRes = float(int(f >= 0.5));
+    return botRes * b + topRes * t;
+  }
+
+  vec2 snapToGrid(vec2 coord) {
+    vec2 offset = vec2(1.0/n * 0.5);
+    vec2 result = (coord - offset)*n;
+    result.x = round(result.x);
+    result.y = round(result.y);
+
+    return result/n + offset;
+  }
 `;
 
 let Kernel = {};
@@ -21,8 +43,9 @@ let Kernel = {};
 Kernel.prototype = {};
 Kernel.prototype.executeScene =
     function(renderer, scalarFieldTgt, scene) {
+  this.uniforms.data.value = scalarFieldTgt.read;
   renderer.setViewport(0, 0, this.size, this.size);
-  renderer.render(scene, this.camera, scalarFieldTgt.rtt);
+  renderer.render(scene, this.camera, scalarFieldTgt.write);
   renderer.setViewport(
     0, 0, renderer.size.width, renderer.size.height
   );
@@ -44,8 +67,13 @@ Kernel.prototype.executeBody =
 };
 
 let createKernel = function(sideLen, kernelSrc) {
+  let uniforms = {
+    n    : { type : "f", value : sideLen },
+    data : { type : "t", value : 0 },
+  };
+
   let material = new Three.ShaderMaterial({
-    uniforms : { n : { type : "f", value : sideLen } },
+    uniforms,
     vertexShader   : vertexShaderSrc,
     fragmentShader : fragmentShaderLeader + kernelSrc,
   });
@@ -87,6 +115,7 @@ let createKernel = function(sideLen, kernelSrc) {
     bodyScene : bodyScene,
     camera    : camera,
     size      : sideLen,
+    uniforms  : uniforms,
   };
 };
 
