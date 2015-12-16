@@ -13,6 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "history": "^1.13.0",
+    "object-assign": "^4.0.1",
     "react": "^0.14",
     "react-dom": "^0.14.2",
     "react-router": "^1.0.0",

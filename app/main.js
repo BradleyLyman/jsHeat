@@ -21,11 +21,12 @@
         { width : 1, height : 1 };
 
       this.renderer.autoClear = false;
+      this.isPressed = false;
 
       if (this.sfr === undefined) {
         this.sfr = SfRenderer.create();
         this.sf  = ScalarField.create(
-          256, 0.3, this.renderer
+          512, 0.0, this.renderer
         );
         this.bcKernel = this.sf.createKernel(`
           void main() {
@@ -53,22 +54,39 @@
           }
 
           void main() {
-            float dt = 0.000003;
+            float dt = 0.1;
             vec2 point = snapToGrid(varyUv);
             vec2 p0p2 = lr(point);
             vec2 p3p4 = bt(point);
             float p1 = texture2D(data, point).a;
 
-            gl_FragColor = vec4(p1 + dt*n*n*(p0p2.x + p0p2.y + p3p4.x + p3p4.y - 4.0*p1));
+            gl_FragColor = vec4(p1 + dt*(p0p2.x + p0p2.y + p3p4.x + p3p4.y - 4.0*p1));
           }
         `);
+
+        this.addHeat = this.sf.createKernel(`
+          uniform vec2 mousePos;
+          void main() {
+            vec2 pos = mousePos;
+            float dis = length(pos - varyUv);
+            float val = texture2D(data, varyUv).a;
+
+            gl_FragColor = vec4(val + 2.0 * exp(-dis*80.0));
+          }
+        `, { mousePos : { type : "v2", value : new Three.Vector2() } });
       }
+      this.mousePos = new Three.Vector2();
       this.start();
     },
 
     updateScene : function() {
-      for (let i = 0; i < 10; i++) {
+      this.addHeat.setUniform("mousePos", this.mousePos);
+      for (let i = 0; i < 60; i++) {
         this.heatIntegrater.executeBody(this.renderer, this.sf);
+        if (this.isPressed) {
+          this.sf.swapBuffers();
+          this.addHeat.executeBody(this.renderer, this.sf);
+        }
         this.bcKernel.executeBc(this.renderer, this.sf);
         this.sf.swapBuffers();
       }
@@ -85,6 +103,46 @@
       this.sfr.resize(dims);
     },
 
+    onMouseDown : function() {
+      console.log('down');
+      this.isPressed = true;
+    },
+
+    onMouseUp : function() {
+      console.log('up');
+      this.isPressed = false;
+    },
+
+    onMouseLeave : function() {
+      console.log('leave');
+      this.isPressed = false;
+    },
+
+    onMouseMove : function(e) {
+      let dims = this.renderer.size;
+      // calc normalized mouse coords
+      let sx = e.nativeEvent.x / dims.width;
+      let sy = (dims.height - e.nativeEvent.y) / dims.height;
+
+      // calculate normalized mouse coords scaled
+      // by aspect ratio. dif offset accounts for
+      // centered image
+      let aspect = dims.width / dims.height;
+      if (dims.height < dims.width) {
+        sx *= aspect;
+        let dif = aspect - 1;
+        sx -= dif/2.0;
+      } else {
+        sy /= aspect;
+        let dif = (1.0/aspect) - 1;
+        sy -= dif/2.0;
+      }
+
+      //console.log(sx, sy);
+      this.mousePos.x = sx;
+      this.mousePos.y = sy;
+    },
+
     render : function() {
       return (
         <div>
@@ -93,6 +151,10 @@
                      maxWidth : '100%',
                      minHeight : '90vh',
                      maxHeight : '91vh'}}
+            onMouseDown={this.onMouseDown}
+            onMouseUp={this.onMouseUp}
+            onMouseLeave={this.onMouseLeave}
+            onMouseMove={this.onMouseMove}
             ref="canvas" />
         </div>
       );

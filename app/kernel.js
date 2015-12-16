@@ -1,5 +1,6 @@
 'use strict';
-let Three = require('three');
+let Three  = require('three'),
+    assign = require('object-assign');
 
 const vertexShaderSrc = `
   uniform float n;
@@ -66,11 +67,17 @@ Kernel.prototype.executeBody =
   this.executeScene(renderer, scalarFieldTgt, this.bodyScene);
 };
 
-let createKernel = function(sideLen, kernelSrc) {
-  let uniforms = {
-    n    : { type : "f", value : sideLen },
-    data : { type : "t", value : 0 },
-  };
+Kernel.prototype.setUniform = function(name, value) {
+  this.uniforms[name].value = value;
+};
+
+let createKernel = function(sideLen, kernelSrc, customUniforms) {
+  let uniforms = assign({
+      n    : { type : "f", value : sideLen },
+      data : { type : "t", value : 0 },
+    },
+    customUniforms
+  );
 
   let material = new Three.ShaderMaterial({
     uniforms,

@@ -7,7 +7,7 @@ const RENDER_TARGET_SETTINGS = {
   stencilBuffer   : false,
   generateMipmaps : false,
   minFilter       : Three.NearestFilter,
-  magFilter       : Three.NearestFilter,
+  magFilter       : Three.LinearFilter,
   format          : Three.RGBAFormat,
   type            : Three.FloatType,
 };
@@ -15,8 +15,8 @@ const RENDER_TARGET_SETTINGS = {
 let ScalarField = {};
 
 ScalarField.prototype = {};
-ScalarField.prototype.createKernel = function(kernelSrc) {
-  return Kernel.create(this.sideLen, kernelSrc);
+ScalarField.prototype.createKernel = function(kernelSrc, customUniforms) {
+  return Kernel.create(this.sideLen, kernelSrc, customUniforms);
 };
 
 ScalarField.prototype.swapBuffers = function() {

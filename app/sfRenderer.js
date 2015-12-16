@@ -20,17 +20,18 @@ const fragmentShaderSrc = `
   };
 
   void main() {
-    ColorPoint gradient[4];
+    ColorPoint gradient[5];
     gradient[0] = ColorPoint(vec4(0.0), 0.0);
-    gradient[1] = ColorPoint(vec4(0.0,0.0,1.0,1.0), 0.3);
-    gradient[2] = ColorPoint(vec4(0.0,1.0,0.0,1.0), 0.6);
-    gradient[3] = ColorPoint(vec4(1.0,0.0,0.0,1.0), 1.0);
+    gradient[1] = ColorPoint(vec4(0.0,0.0,1.0,1.0), 60.0);
+    gradient[2] = ColorPoint(vec4(0.0,1.0,0.0,1.0), 120.0);
+    gradient[3] = ColorPoint(vec4(1.0,0.0,0.0,1.0), 180.0);
+    gradient[4] = ColorPoint(vec4(1.0,1.0,1.0,1.0), 400.0);
 
     float val = texture2D(data, varyUv).a;
 
     float max = 1.0;
     vec4 finalColor = vec4(0.0);
-    for (int i = 1; i < 4; i++) {
+    for (int i = 1; i < 5; i++) {
       finalColor =
         mix(finalColor, gradient[i].color,
             smoothstep(
