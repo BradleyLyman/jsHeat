@@ -49,7 +49,7 @@ let sfRenderer = {};
 sfRenderer.prototype = {};
 sfRenderer.prototype.render = function(renderer, scalarField) {
   this.uniforms.data.value = scalarField.read;
-  renderer.render(this.scene, this.camera);
+  renderer.render(this.scene, this.camera, undefined, true);
 };
 
 sfRenderer.prototype.resize = function(dims) {

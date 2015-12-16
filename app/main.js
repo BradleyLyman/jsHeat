@@ -1,6 +1,5 @@
 (function() {
   'use strict';
-  console.log('loaded');
   let Three       = require('three'),
       ThreeMixin  = require('./ThreeMixin.js'),
       React       = require('react'),
@@ -20,6 +19,7 @@
       this.renderer.size =
         { width : 1, height : 1 };
 
+      this.renderer.setClearColor(0x333333);
       this.renderer.autoClear = false;
       this.isPressed = false;
 
@@ -31,6 +31,7 @@
         this.bcKernel = this.sf.createKernel(`
           void main() {
             gl_FragColor = vec4(0.0);
+
           }
         `);
 
@@ -104,17 +105,14 @@
     },
 
     onMouseDown : function() {
-      console.log('down');
       this.isPressed = true;
     },
 
     onMouseUp : function() {
-      console.log('up');
       this.isPressed = false;
     },
 
     onMouseLeave : function() {
-      console.log('leave');
       this.isPressed = false;
     },
 
@@ -149,8 +147,8 @@
           <canvas
             style={{ minWidth : '100%',
                      maxWidth : '100%',
-                     minHeight : '90vh',
-                     maxHeight : '91vh'}}
+                     minHeight : '99vh',
+                     maxHeight : '100vh'}}
             onMouseDown={this.onMouseDown}
             onMouseUp={this.onMouseUp}
             onMouseLeave={this.onMouseLeave}

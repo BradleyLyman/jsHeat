@@ -39,7 +39,7 @@ module.exports = {
   },
   plugins : [
     new HtmlWebpackPlugin({
-      title    : 'React and Three',
+      title    : 'jsHeatSim',
       template : './app/devIndex.html',
       inject   : 'body'
     })
