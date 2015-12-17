@@ -18,9 +18,7 @@ const vertexShaderSrc = `
     vec2 offset = vec2(n/2.0);
     vec2 tpos   = position.xy + offset;
     varyUv      = tpos / n;
-    gl_Position =
-        modelViewMatrix * projectionMatrix *
-        vec4(position, 1.0);
+    gl_Position = vec4(2.0 * position / n, 1.0);
   }
 `;
 
@@ -147,14 +145,11 @@ let createKernel = function(sideLen, kernelSrc, customUniforms) {
   });
 
   let dim = sideLen / 2;
-  let camera = new Three.OrthographicCamera(
-    -dim, dim, dim, -dim, 1.0, -1.0
-  );
+  let camera = new Three.OrthographicCamera(1.0, 1.0, 1.0, 1.0, 1.0);
 
   let scene         = new Three.Scene();
   let planeGeometry = new Three.PlaneGeometry(sideLen, sideLen);
-  let plane = new Three.Mesh(planeGeometry, material);
-  scene.add(plane);
+  scene.add(new Three.Mesh(planeGeometry, material));
 
   let bcScene = new Three.Scene();
   let lineGeometry = new Three.Geometry();
