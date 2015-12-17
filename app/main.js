@@ -1,5 +1,5 @@
+'use strict';
 (function() {
-  'use strict';
   let Three       = require('three'),
       ThreeMixin  = require('./ThreeMixin.js'),
       React       = require('react'),
@@ -9,7 +9,7 @@
       Route       = ReactRouter.Route,
       Link        = ReactRouter.Link,
       gpgpu       = require('./gpgpu/index.js'),
-      SfRenderer  = require('./sfRenderer.js');
+      DataFrameRenderer = require('./dataFrameRenderer.js');
 
   const Scene = React.createClass({
     mixins : [ThreeMixin],
@@ -20,7 +20,7 @@
       this.isPressed = false;
 
       if (this.sfr === undefined) {
-        this.sfr = SfRenderer.create();
+        this.sfr = DataFrameRenderer.create();
         this.sf = gpgpu.DataFrame.create(512);
 
         this.bcKernel = this.sf.createKernel(`

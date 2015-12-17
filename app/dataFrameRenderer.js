@@ -44,15 +44,16 @@ const fragmentShaderSrc = `
   }
 `;
 
-let sfRenderer = {};
+/** @class DataFrameRenderer **/
+let DataFrameRenderer = {};
 
-sfRenderer.prototype = {};
-sfRenderer.prototype.render = function(renderer, scalarField) {
+DataFrameRenderer.prototype = {};
+DataFrameRenderer.prototype.render = function(renderer, scalarField) {
   this.uniforms.data.value = scalarField.read;
   renderer.render(this.scene, this.camera, undefined, true);
 };
 
-sfRenderer.prototype.resize = function(dims) {
+DataFrameRenderer.prototype.resize = function(dims) {
   let aspect = dims.width/dims.height;
   if (dims.width >= dims.height) {
     this.camera.top = 1.0;
@@ -68,7 +69,7 @@ sfRenderer.prototype.resize = function(dims) {
   this.camera.updateProjectionMatrix();
 };
 
-let createSfRenderer = function() {
+module.exports.create = function() {
   let uniforms = { data : { type : "t" } };
   let material = new Three.ShaderMaterial({
     vertexShader   : vertexShaderSrc,
@@ -86,11 +87,9 @@ let createSfRenderer = function() {
   scene.add(plane);
   console.log(plane);
   return {
-    __proto__ : sfRenderer.prototype,
+    __proto__ : DataFrameRenderer.prototype,
     scene     : scene,
     camera    : camera,
     uniforms  : uniforms,
   };
 };
-
-module.exports.create = createSfRenderer;
