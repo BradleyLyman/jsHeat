@@ -8,9 +8,8 @@
       Router      = ReactRouter.Router,
       Route       = ReactRouter.Route,
       Link        = ReactRouter.Link,
-      DataFrame   = require('./gpgpu/dataFrame.js'),
-      SfRenderer  = require('./sfRenderer.js'),
-      Kernel      = require('./gpgpu/kernel.js');
+      gpgpu       = require('./gpgpu/index.js'),
+      SfRenderer  = require('./sfRenderer.js');
 
   const Scene = React.createClass({
     mixins : [ThreeMixin],
@@ -22,7 +21,7 @@
 
       if (this.sfr === undefined) {
         this.sfr = SfRenderer.create();
-        this.sf = DataFrame.create(512);
+        this.sf = gpgpu.DataFrame.create(512);
 
         this.bcKernel = this.sf.createKernel(`
           void main() {
