@@ -10,15 +10,12 @@
       Link        = ReactRouter.Link,
       ScalarField = require('./scalarField.js'),
       SfRenderer  = require('./sfRenderer.js'),
-      Kernel      = require('./kernel.js');
+      Kernel      = require('./gpgpu/kernel.js');
 
   const Scene = React.createClass({
     mixins : [ThreeMixin],
 
     componentDidMount : function() {
-      this.renderer.size =
-        { width : 1, height : 1 };
-
       this.renderer.setClearColor(0x333333);
       this.renderer.autoClear = false;
       this.isPressed = false;
@@ -92,6 +89,9 @@
         this.sf.swapBuffers();
       }
 
+      this.renderer.setViewport(
+        0, 0, this.canvasWidth, this.canvasHeight
+      );
       this.sfr.render(this.renderer, this.sf);
     },
 
@@ -100,7 +100,6 @@
         width  : this.canvasWidth,
         height : this.canvasHeight,
       };
-      this.renderer.size = dims;
       this.sfr.resize(dims);
     },
 
@@ -117,16 +116,18 @@
     },
 
     onMouseMove : function(e) {
-      let dims = this.renderer.size;
+      let h = this.canvasHeight;
+      let w = this.canvasWidth;
+
       // calc normalized mouse coords
-      let sx = e.nativeEvent.clientX / dims.width;
-      let sy = (dims.height - e.nativeEvent.clientY) / dims.height;
+      let sx = e.nativeEvent.clientX / w;
+      let sy = (h - e.nativeEvent.clientY) / h;
 
       // calculate normalized mouse coords scaled
       // by aspect ratio. dif offset accounts for
       // centered image
-      let aspect = dims.width / dims.height;
-      if (dims.height < dims.width) {
+      let aspect = w / h;
+      if (h < w) {
         sx *= aspect;
         let dif = aspect - 1;
         sx -= dif/2.0;

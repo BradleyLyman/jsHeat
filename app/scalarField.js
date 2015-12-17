@@ -1,6 +1,6 @@
 'use strict';
 let Three = require('three'),
-    Kernel = require('./kernel.js');
+    Kernel = require('./gpgpu/kernel.js');
 
 const RENDER_TARGET_SETTINGS = {
   depthBuffer     : false,
