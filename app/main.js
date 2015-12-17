@@ -8,8 +8,10 @@
       Router      = ReactRouter.Router,
       Route       = ReactRouter.Route,
       Link        = ReactRouter.Link,
-      gpgpu       = require('./gpgpu/index.js'),
+      gpgpc       = require('jsgpgc'),
       DataFrameRenderer = require('./dataFrameRenderer.js');
+
+  gpgpc.init(Three);
 
   const Scene = React.createClass({
     mixins : [ThreeMixin],
@@ -21,7 +23,7 @@
 
       if (this.sfr === undefined) {
         this.sfr = DataFrameRenderer.create();
-        this.sf = gpgpu.DataFrame.create(512);
+        this.sf = gpgpc.DataFrame.create(512);
 
         this.bcKernel = this.sf.createKernel(`
           void main() {
@@ -29,10 +31,12 @@
 
           }
         `);
+
         // execute the bcKernel over entire frame to set the initial value
         this.bcKernel.execute(this.renderer, this.sf);
         this.sf.swapBuffers();
         this.bcKernel.execute(this.renderer, this.sf);
+        this.sf.swapBuffers();
 
         this.heatIntegrater = this.sf.createKernel(`
           vec2 lr(vec2 p) {
@@ -75,6 +79,7 @@
           }
         `, { mousePos : { type : "v2", value : new Three.Vector2() } });
       }
+
       this.mousePos = new Three.Vector2();
       this.start();
     },
