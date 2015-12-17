@@ -69,22 +69,22 @@ Kernel.prototype = {
    * By choosing scenes we can execute on all of the data, or
    * merely a portion of the data (like the boundaries for example).
    * @param renderer - THREE.js WebGLRenderer instance.
-   * @param scalarFieldTgt - Instance of a scalarField.
+   * @param dataFrame - Instance of a scalarField.
    * @param scene - Scene containing target geometry.
    **/
-  _executeScene : function(renderer, scalarFieldTgt, scene) {
-    this.uniforms.data.value = scalarFieldTgt.read;
+  _executeScene : function(renderer, dataFrame, scene) {
+    this.uniforms.data.value = dataFrame.read;
     renderer.setViewport(0, 0, this.size, this.size);
-    renderer.render(scene, this.camera, scalarFieldTgt.write);
+    renderer.render(scene, this.camera, dataFrame.write);
   },
 
   /**
    * Executes the kernel over the entire dataset.
    * @param renderer - THREE.js WebGLRenderer instance.
-   * @param scalarFieldTgt - Instance of a scalarField.
+   * @param dataFrame - Instance of a scalarField.
    **/
-  execute : function(renderer, scalarFieldTgt) {
-    this._executeScene(renderer, scalarFieldTgt, this.scene);
+  execute : function(renderer, dataFrame) {
+    this._executeScene(renderer, dataFrame, this.scene);
   },
 
   /**
@@ -92,20 +92,20 @@ Kernel.prototype = {
    * Thus the kernel only hits the top, bottom, left, and right
    * edge texels of the dataset.
    * @param renderer - THREE.js WebGLRenderer instance.
-   * @param scalarFieldTgt - Instance of a scalarField.
+   * @param dataFrame - Instance of a scalarField.
    **/
-  executeBc : function(renderer, scalarFieldTgt) {
-    this._executeScene(renderer, scalarFieldTgt, this.bcScene);
+  executeBc : function(renderer, dataFrame) {
+    this._executeScene(renderer, dataFrame, this.bcScene);
   },
 
   /**
    * Executes the kernel over all parts of the dataset except
    * for the edges.
    * @param renderer - THREE.js WebGLRenderer instance.
-   * @param scalarFieldTgt - Instance of a scalarField.
+   * @param dataFrame - Instance of a scalarField.
    **/
-  executeBody : function(renderer, scalarFieldTgt) {
-    this._executeScene(renderer, scalarFieldTgt, this.bodyScene);
+  executeBody : function(renderer, dataFrame) {
+    this._executeScene(renderer, dataFrame, this.bodyScene);
   },
 
   /**

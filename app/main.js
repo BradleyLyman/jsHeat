@@ -8,7 +8,7 @@
       Router      = ReactRouter.Router,
       Route       = ReactRouter.Route,
       Link        = ReactRouter.Link,
-      ScalarField = require('./scalarField.js'),
+      DataFrame   = require('./gpgpu/dataFrame.js'),
       SfRenderer  = require('./sfRenderer.js'),
       Kernel      = require('./gpgpu/kernel.js');
 
@@ -22,15 +22,18 @@
 
       if (this.sfr === undefined) {
         this.sfr = SfRenderer.create();
-        this.sf  = ScalarField.create(
-          512, 0.0, this.renderer
-        );
+        this.sf = DataFrame.create(512);
+
         this.bcKernel = this.sf.createKernel(`
           void main() {
             gl_FragColor = vec4(0.0);
 
           }
         `);
+        // execute the bcKernel over entire frame to set the initial value
+        this.bcKernel.execute(this.renderer, this.sf);
+        this.sf.swapBuffers();
+        this.bcKernel.execute(this.renderer, this.sf);
 
         this.heatIntegrater = this.sf.createKernel(`
           vec2 lr(vec2 p) {
