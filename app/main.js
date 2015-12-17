@@ -82,9 +82,9 @@
 
     updateScene : function() {
       this.addHeat.setUniform("mousePos", this.mousePos);
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 30; i++) {
         this.heatIntegrater.executeBody(this.renderer, this.sf);
-        if (this.isPressed) {
+        if (this.isPressed === true) {
           this.sf.swapBuffers();
           this.addHeat.executeBody(this.renderer, this.sf);
         }
@@ -119,8 +119,8 @@
     onMouseMove : function(e) {
       let dims = this.renderer.size;
       // calc normalized mouse coords
-      let sx = e.nativeEvent.x / dims.width;
-      let sy = (dims.height - e.nativeEvent.y) / dims.height;
+      let sx = e.nativeEvent.clientX / dims.width;
+      let sy = (dims.height - e.nativeEvent.clientY) / dims.height;
 
       // calculate normalized mouse coords scaled
       // by aspect ratio. dif offset accounts for
@@ -136,7 +136,6 @@
         sy -= dif/2.0;
       }
 
-      //console.log(sx, sy);
       this.mousePos.x = sx;
       this.mousePos.y = sy;
     },
