@@ -1,9 +1,13 @@
 'use strict';
-let Three = require('three'),
-    ThreeMixin = require('../ThreeMixin.js'),
-    React = require('react'),
+let Three             = require('three'),
+    ThreeMixin        = require('../ThreeMixin.js'),
+    React             = require('react'),
+    gpgc              = require('jsgpgc'),
+
     DataFrameRenderer = require('../dataFrameRenderer.js'),
-    gpgc  = require('jsgpgc');
+    HeatIntegraterSrc = require('./shaders/HeatIntegraterSrc.js'),
+    DirichletSrc      = require('./shaders/DirichletSrc.js'),
+    AddHeatSrc        = require('./shaders/AddHeatSrc.js');
 
 gpgc.init(Three);
 
@@ -20,61 +24,18 @@ const Scene = React.createClass({
 
     if (this.sfr === undefined) {
       this.sfr = DataFrameRenderer.create();
-      this.sf = gpgc.DataFrame.create(512);
+      this.sf  = gpgc.DataFrame.create(512);
 
-      this.bcKernel = this.sf.createKernel(`
-        void main() {
-          gl_FragColor = vec4(0.0);
-
-        }
-      `);
+      this.bcKernel       = this.sf.createKernel(DirichletSrc);
+      this.heatIntegrater = this.sf.createKernel(HeatIntegraterSrc);
+      this.addHeat        = this.sf.createKernel(
+        AddHeatSrc,
+        { mousePos : { type : "v2", value : new Three.Vector2() } }
+      );
 
       // execute the bcKernel over entire frame to set the initial value
       this.bcKernel.execute(this.renderer, this.sf);
       this.sf.swapBuffers();
-      this.bcKernel.execute(this.renderer, this.sf);
-      this.sf.swapBuffers();
-
-      this.heatIntegrater = this.sf.createKernel(`
-        vec2 lr(vec2 p) {
-          vec2 left = p - vec2(1.0/n, 0.0);
-          vec2 right = p + vec2(1.0/n, 0.0);
-          vec2 res;
-          res.x = texture2D(data, left).a;
-          res.y = texture2D(data, right).a;
-          return res;
-        }
-
-        vec2 bt(vec2 p) {
-          vec2 t = p + vec2(0.0, 1.0/n);
-          vec2 b = p - vec2(0.0, 1.0/n);
-          vec2 res;
-          res.x = texture2D(data, t).a;
-          res.y = texture2D(data, b).a;
-          return res;
-        }
-
-        void main() {
-          float dt = 0.1;
-          vec2 point = snapToGrid(varyUv);
-          vec2 p0p2 = lr(point);
-          vec2 p3p4 = bt(point);
-          float p1 = texture2D(data, point).a;
-
-          gl_FragColor = vec4(p1 + dt*(p0p2.x + p0p2.y + p3p4.x + p3p4.y - 4.0*p1));
-        }
-      `);
-
-      this.addHeat = this.sf.createKernel(`
-        uniform vec2 mousePos;
-        void main() {
-          vec2 pos = mousePos;
-          float dis = length(pos - varyUv);
-          float val = texture2D(data, varyUv).a;
-
-          gl_FragColor = vec4(val + 2.0 * exp(-dis*80.0));
-        }
-      `, { mousePos : { type : "v2", value : new Three.Vector2() } });
     }
 
     this.mousePos = new Three.Vector2();
