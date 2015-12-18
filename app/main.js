@@ -14,5 +14,8 @@
     <Route path="/" component={Simulation}/>
   );
 
-  ReactDOM.render(<Router>{Routes}</Router>, document.body);
+  ReactDOM.render(
+    <Router>{Routes}</Router>,
+    document.getElementById('app')
+  );
 }());
